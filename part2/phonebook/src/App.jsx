@@ -1,5 +1,55 @@
 import { useState } from "react";
 
+const Filter = (props) => {
+	return (
+		<div>
+			<p>
+				<input onChange={props.onChange} value={props.value} />
+			</p>
+		</div>
+	);
+};
+
+const Input = (props) => {
+	return (
+		<>
+			<div>
+				{props.text}
+				<input value={props.value} onChange={props.onChange} />
+			</div>
+			<br />
+		</>
+	);
+};
+
+const PersonForm = (props) => {
+	return (
+		<form onSubmit={props.onSubmit}>
+			<Input
+				text="Name"
+				value={props.newName}
+				onChange={props.handleNameChange}
+			/>
+			<Input
+				text="Number:"
+				value={props.newNumber}
+				onChange={props.handleNumberChange}
+			/>
+			<div>
+				<button type="submit">add</button>
+			</div>
+		</form>
+	);
+};
+
+const Persons = (props) => {
+	return props.entriesToShow.map((person) => (
+		<p key={person.id}>
+			{person.name} {person.number}
+		</p>
+	));
+};
+
 const App = () => {
 	const [persons, setPersons] = useState([
 		{ name: "Arto Hellas", number: "040-123456", id: 1 },
@@ -26,16 +76,13 @@ const App = () => {
 	};
 
 	const handleNameChange = (event) => {
-		console.log(event.target.value);
 		setNewName(event.target.value);
 	};
 
 	const handleNumberChange = (event) => {
-		console.log(event.target.value);
 		setNewNumber(event.target.value);
 	};
 	const handleFilterChange = (event) => {
-		console.log(event.target.value);
 		setFilterInput(event.target.value);
 	};
 
@@ -46,30 +93,11 @@ const App = () => {
 	return (
 		<div>
 			<h2>Phonebook</h2>
-			<div>
-				<p>
-					filter shown with
-					<input onChange={handleFilterChange} value={filterInput} />
-				</p>
-			</div>
+			<Filter onChange={handleFilterChange} value={filterInput} />
 			<h2>Add new entry </h2>
-			<form onSubmit={addName}>
-				<div>
-					name: <input value={newName} onChange={handleNameChange} />
-				</div>
-				<div>
-					number: <input value={newNumber} onChange={handleNumberChange} />
-				</div>
-				<div>
-					<button type="submit">add</button>
-				</div>
-			</form>
+			<PersonForm onSubmit={addName} />
 			<h2>Numbers</h2>
-			{entriesToShow.map((person) => (
-				<p key={person.id}>
-					{person.name} {person.number}
-				</p>
-			))}
+			<Persons entriesToShow={entriesToShow} />
 		</div>
 	);
 };
