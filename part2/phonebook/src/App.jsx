@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import axios from "axios";
+import personService from "./services/persons";
 
 const Persons = (props) => {
 	return (
@@ -60,6 +61,14 @@ const App = () => {
 			setPersons(response.data);
 		});
 	}, []);
+
+	useEffect(() => {
+		personService.getAll().then((response) => {
+			console.log("promise fulfilled");
+			setPersons(response.data);
+		});
+	}, []);
+
 	console.log("render", persons.length, "persons");
 
 	const addPerson = (event) => {
@@ -74,26 +83,22 @@ const App = () => {
 			};
 			/*if the person is in the phonebook already, display error alert*/
 			setPersons(persons.concat(personObject));
-			axios
-				.post("http://localhost:3001/persons", personObject)
-				.then((response) => {
-					console.log(response);
-				});
+
+			personService.create(personObject).then((response) => {
+				setPersons(persons.concat(response.data));
+			});
 		}
 	};
 
 	const handleNameInputChange = (event) => {
-		console.log(event.target.value);
 		setNewName(event.target.value);
 	};
 
 	const handleNumberInputChange = (event) => {
-		console.log(event.target.value);
 		setNewNumber(event.target.value);
 	};
 
 	const handlePersonFilter = (event) => {
-		console.log(event.target.value);
 		setPersonFilter(event.target.value.toLowerCase().trim());
 	};
 
