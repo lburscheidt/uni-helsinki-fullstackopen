@@ -1,10 +1,5 @@
-<<<<<<< HEAD
-import { useState } from "react";
-import "./App.css";
-=======
 import { useState, useEffect } from "react";
 import axios from "axios";
->>>>>>> bca072c678df14f26d401910912656b3e8b01334
 
 const Persons = (props) => {
 	return (
@@ -49,15 +44,15 @@ const PersonForm = (props) => {
 		</form>
 	);
 };
+
+const promise = axios.get("http://localhost:3001/persons");
+console.log(promise);
+
 const App = () => {
 	const [persons, setPersons] = useState([]);
 	const [newName, setNewName] = useState("");
 	const [newNumber, setNewNumber] = useState("");
 	const [personFilter, setPersonFilter] = useState("");
-
-<<<<<<< HEAD
-	const addPerson = (event) => {
-=======
 	useEffect(() => {
 		console.log("effect");
 		axios.get("http://localhost:3001/persons").then((response) => {
@@ -65,9 +60,9 @@ const App = () => {
 			setPersons(response.data);
 		});
 	}, []);
+	console.log("render", persons.length, "persons");
 
-	const addName = (event) => {
->>>>>>> bca072c678df14f26d401910912656b3e8b01334
+	const addPerson = (event) => {
 		event.preventDefault();
 		if (persons.some((person) => person.name === newName)) {
 			alert(`${newName} is already added to phonebook`);
