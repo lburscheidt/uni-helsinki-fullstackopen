@@ -14,7 +14,10 @@ const update = (id, newObject) => {
 };
 
 const remove = (id) => {
-	axios.delete(`${baseUrl}/${id}`);
+	const request = axios.delete(`${baseUrl}/${id}`);
+	return request.then((response) => {
+		return response.data;
+	});
 };
 
 export default {

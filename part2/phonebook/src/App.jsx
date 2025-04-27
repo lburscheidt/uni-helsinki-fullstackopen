@@ -8,7 +8,15 @@ const Persons = (props) => {
 			{props.personsToShow.map((person) => (
 				<p key={person.id}>
 					{person.name} {person.number}
-					<button type="button" id={person.id}>
+					<button
+						type="button"
+						id={person.id}
+						onClick={() => {
+							if (window.confirm(`Do you want to delete ${person.name}?`)) {
+								props.deletePerson(person.id);
+							}
+						}}
+					>
 						delete
 					</button>
 				</p>
@@ -50,21 +58,11 @@ const PersonForm = (props) => {
 	);
 };
 
-const promise = axios.get("http://localhost:3001/persons");
-console.log(promise);
-
 const App = () => {
 	const [persons, setPersons] = useState([]);
 	const [newName, setNewName] = useState("");
 	const [newNumber, setNewNumber] = useState("");
 	const [personFilter, setPersonFilter] = useState("");
-	useEffect(() => {
-		console.log("effect");
-		axios.get("http://localhost:3001/persons").then((response) => {
-			console.log("promise fulfilled");
-			setPersons(response.data);
-		});
-	}, []);
 
 	useEffect(() => {
 		personService.getAll().then((response) => {
@@ -74,6 +72,7 @@ const App = () => {
 	}, []);
 
 	console.log("render", persons.length, "persons");
+	console.log(persons);
 
 	const addPerson = (event) => {
 		event.preventDefault();
@@ -92,6 +91,12 @@ const App = () => {
 				setPersons(persons.concat(response.data));
 			});
 		}
+	};
+
+	const deletePerson = (id) => {
+		personService.remove(id).then(() => {
+			setPersons(persons.filter((person) => person.id !== id));
+		});
 	};
 
 	const handleNameInputChange = (event) => {
@@ -124,7 +129,11 @@ const App = () => {
 				handleNameInputChange={handleNameInputChange}
 			/>
 			<h3>Numbers</h3>
-			<Persons personsToShow={personsToShow} persons={persons} />
+			<Persons
+				personsToShow={personsToShow}
+				persons={persons}
+				deletePerson={deletePerson}
+			/>
 		</div>
 	);
 };
