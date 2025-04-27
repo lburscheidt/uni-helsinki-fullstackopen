@@ -69,11 +69,16 @@ const App = () => {
 		} else {
 			const personObject = {
 				name: newName,
-				id: persons.length + 1,
+				id: (persons.length + 1).toString(),
 				number: newNumber,
 			};
 			/*if the person is in the phonebook already, display error alert*/
 			setPersons(persons.concat(personObject));
+			axios
+				.post("http://localhost:3001/persons", personObject)
+				.then((response) => {
+					console.log(response);
+				});
 		}
 	};
 
