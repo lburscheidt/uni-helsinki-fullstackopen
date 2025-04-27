@@ -8,6 +8,9 @@ const Persons = (props) => {
 			{props.personsToShow.map((person) => (
 				<p key={person.id}>
 					{person.name} {person.number}
+					<button type="button" id={person.id}>
+						delete
+					</button>
 				</p>
 			))}
 		</div>
@@ -22,6 +25,7 @@ const Filter = (props) => {
 		</label>
 	);
 };
+
 const PersonForm = (props) => {
 	return (
 		<form onSubmit={props.onSubmit}>
