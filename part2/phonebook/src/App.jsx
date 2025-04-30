@@ -62,8 +62,10 @@ const Notification = ({ message }) => {
 	if (message === null) {
 		return null;
 	}
-
-	return <div className="notification">{message}</div>;
+	if (message.startsWith("Successfully")) {
+		return <div className="notification">{message}</div>;
+	}
+		return <div className="error">{message}</div>;
 };
 
 const App = () => {
@@ -95,17 +97,30 @@ const App = () => {
 					`${newName} is already added to phonebook, replace old number with the new one?`,
 				)
 			) {
-				personService.update(id, newPersonObject).then((response) => {
-					setPersons(
-						persons.map((person) =>
-							person.name === newPersonObject.name ? response.data : person,
-						),
-					);
-				});
-				setNotification(`Successfully added new number for ${newName}`);
-				setTimeout(() => {
-					setNotification(null);
-				}, 5000);
+				personService
+					.update(id, newPersonObject)
+					.then((response) => {
+						setPersons(
+							persons.map((person) =>
+								person.name === newPersonObject.name ? response.data : person,
+							),
+						);
+						setNotification(`Successfully added new number for ${newName}.`);
+						setTimeout(() => {
+							setNotification(null);
+						}, 5000);
+					})
+					.catch((error) => {
+						setNotification(
+							`Information for ${newName} has already been removed from the server.`,
+						);
+						setTimeout(() => {
+							setNotification(null);
+						}, 5000);
+						setPersons(
+							persons.filter((person) => person.name !== newPersonObject.name),
+						);
+					});
 			}
 		} else {
 			const personObject = {
