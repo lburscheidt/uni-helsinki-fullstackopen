@@ -1,5 +1,9 @@
 import { useState } from "react";
 
+const Heading = ({ text }) => {
+	return <h1>{text}</h1>;
+};
+
 const Button = ({ text, onClick }) => {
 	return (
 		<button type="button" onClick={onClick}>
@@ -8,73 +12,32 @@ const Button = ({ text, onClick }) => {
 	);
 };
 
-const Statistics = ({ good, neutral, bad, all, average, positive }) => {
-	if (good + neutral + bad === 0) {
-		return <p>No feedback given</p>;
-	}
+const StatisticLine = (props) => {
 	return (
-		<div>
-			<table>
-				<tbody>
-					<tr>
-						<td>
-							<StatisticLine text="good" />
-						</td>
-						<td>
-							<StatisticLine value={good} />
-						</td>
-					</tr>
-					<tr>
-						<td>
-							<StatisticLine text="neutral" />
-						</td>
-						<td>
-							<StatisticLine value={neutral} />
-						</td>
-					</tr>
-					<tr>
-						<td>
-							<StatisticLine text="bad" />
-						</td>
-						<td>
-							<StatisticLine value={bad} />
-						</td>
-					</tr>
-					<tr>
-						<td>
-							<StatisticLine text="all" />
-						</td>
-						<td>
-							<StatisticLine value={all} />
-						</td>
-					</tr>
-					<tr>
-						<td>
-							<StatisticLine text="average" />
-						</td>
-						<td>
-							<StatisticLine value={average} />
-						</td>
-					</tr>
-					<tr>
-						<td>
-							<StatisticLine text="positive" />
-						</td>
-						<td>
-							<StatisticLine value={positive} />
-						</td>
-					</tr>
-				</tbody>
-			</table>
-		</div>
+		<tr>
+			<td>{props.text} </td>
+			<td>
+				{props.value} {props.symbol}
+			</td>
+		</tr>
 	);
 };
 
-const StatisticLine = ({ text, value }) => {
+const Statistics = (props) => {
+	if (props.total === 0) {
+		return <p>No feedback given</p>;
+	}
 	return (
-		<p>
-			{text} {value}
-		</p>
+		<table>
+			<tbody>
+				<StatisticLine text="good" value={props.good} />
+				<StatisticLine text="neutral" value={props.neutral} />
+				<StatisticLine text="bad" value={props.bad} />
+				<StatisticLine text="all" value={props.total} />
+				<StatisticLine text="average" value={props.average} />
+				<StatisticLine text="positive" value={props.positive} symbol={"%"} />
+			</tbody>
+		</table>
 	);
 };
 
@@ -84,32 +47,34 @@ const App = () => {
 	const [neutral, setNeutral] = useState(0);
 	const [bad, setBad] = useState(0);
 
-	const increaseGood = () => {
+	const total = good + bad + neutral;
+	const positive = (good / total) * 100;
+	const average = (good - bad) / total;
+
+	const handleGood = () => {
 		setGood(good + 1);
 	};
 
-	const increaseNeutral = () => {
+	const handleNeutral = () => {
 		setNeutral(neutral + 1);
 	};
 
-	const increaseBad = () => {
+	const handleBad = () => {
 		setBad(bad + 1);
 	};
-	const all = good + neutral + bad;
-	const average = (good - bad) / all;
-	const positive = (good / (good + bad + neutral)) * 100;
+
 	return (
 		<div>
-			<h1>Give feedback</h1>
-			<Button text="good" onClick={increaseGood} />
-			<Button text="neutral" onClick={increaseNeutral} />
-			<Button text="bad" onClick={increaseBad} />
-			<h1>Statistics</h1>
+			<Heading text="Give feedback" />
+			<Button text="good" onClick={handleGood} />
+			<Button text="neutral" onClick={handleNeutral} />
+			<Button text="bad" onClick={handleBad} />
+			<Heading text="Statistics" />
 			<Statistics
 				good={good}
 				neutral={neutral}
 				bad={bad}
-				all={all}
+				total={total}
 				average={average}
 				positive={positive}
 			/>
