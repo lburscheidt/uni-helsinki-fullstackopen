@@ -1,8 +1,13 @@
 import axios from "axios";
-const baseUrl = "http://localhost:3001/persons";
+const baseUrl = "https://studies.cs.helsinki.fi/restcountries/api";
 
 const getAll = () => {
-	const request = axios.get(baseUrl);
+	const request = axios.get(`${baseUrl}/all`);
+	return request.then((response) => response.data);
+};
+
+const getCountry = (country) => {
+	const request = axios.get(`${baseUrl}/name/${country}`);
 	return request.then((response) => response.data);
 };
 
@@ -21,4 +26,4 @@ const remove = (id) => {
 	return request.then((response) => response.data);
 };
 
-export default { getAll, create, update, remove };
+export default { getAll, create, update, remove, getCountry };

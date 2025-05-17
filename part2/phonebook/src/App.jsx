@@ -1,56 +1,34 @@
 import { useState, useEffect } from "react";
 import personService from "./services/persons";
+import "./index.css";
 
-const Persons = (props) => {
-	console.log(props);
+const Filter = ({ searchInput, handleSearchChange }) => {
 	return (
 		<div>
-			{props.personsToShow.map((person) => (
-				<p key={person.id}>
-					{person.name} {person.number}
-					<button
-						type="button"
-						id={person.id}
-						onClick={() => {
-							if (window.confirm(`Do you want to delete ${person.name}?`)) {
-								props.deletePerson(person.id);
-							}
-						}}
-					>
-						delete
-					</button>
-				</p>
-			))}
+			<label>
+				filter shown with
+				<input value={searchInput} onChange={handleSearchChange} />
+			</label>
 		</div>
-	);
-};
-
-const Filter = ({ value, onChange }) => {
-	return (
-		<label>
-			filter shown with
-			<input value={value} onChange={onChange} />
-		</label>
 	);
 };
 
 const PersonForm = (props) => {
 	return (
-		<form onSubmit={props.onSubmit}>
+		<form onSubmit={props.addPerson}>
 			<div>
 				<label>
 					name:
-					<input value={props.name} onChange={props.handleNameInputChange} />
-				</label>
-				<br />
-				<label>
-					number:
-					<input
-						value={props.number}
-						onChange={props.handleNumberInputChange}
-					/>
+					<input value={props.newName} onChange={props.handleNameChange} />
 				</label>
 			</div>
+			<div>
+				<label>
+					number:
+					<input value={props.newNumber} onChange={props.handleNumberChange} />
+				</label>
+			</div>
+
 			<div>
 				<button type="submit">add</button>
 			</div>
@@ -58,87 +36,119 @@ const PersonForm = (props) => {
 	);
 };
 
+const Persons = (props) => {
+	console.log(props);
+	return (
+		<div>
+			{props.personsToShow.map((person) => (
+				<Person
+					key={person.id}
+					id={person.id}
+					name={person.name}
+					number={person.number}
+					deletePerson={props.deletePerson}
+				/>
+			))}
+		</div>
+	);
+};
+
+const Person = (props) => {
+	return (
+		<p key={props.id}>
+			{props.name} {props.number}
+			<button
+				type="button"
+				onClick={() => {
+					if (window.confirm(`Do you want to delete ${props.name}?`)) {
+						props.deletePerson(props.id);
+					}
+				}}
+			>
+				Delete
+			</button>
+		</p>
+	);
+};
+
 const Notification = ({ message }) => {
-	if (message === null) {
+	if (message === "") {
 		return null;
 	}
-	if (message.startsWith("Successfully")) {
-		return <div className="notification">{message}</div>;
+
+	return <div className="error">{message}</div>;
+};
+const SuccessNotification = ({ message }) => {
+	if (message === "") {
+		return null;
 	}
-		return <div className="error">{message}</div>;
+
+	return <div className="success">{message}</div>;
 };
 
 const App = () => {
 	const [persons, setPersons] = useState([]);
 	const [newName, setNewName] = useState("");
 	const [newNumber, setNewNumber] = useState("");
-	const [personFilter, setPersonFilter] = useState("");
-	const [notification, setNotification] = useState(null);
+	const [searchInput, setSearchInput] = useState("");
+	const [errorMessage, setErrorMessage] = useState("");
+	const [successMessage, setSuccessMessage] = useState("");
 
 	useEffect(() => {
-		personService.getAll().then((response) => {
-			console.log("promise fulfilled");
-			setPersons(response.data);
+		personService.getAll().then((persons) => {
+			setPersons(persons);
 		});
 	}, []);
 
-	const addPerson = (event) => {
+	function addPerson(event) {
 		event.preventDefault();
-		if (persons.find((person) => person.name === newName)) {
-			const person = persons.find((person) => person.name === newName);
-			const id = person.id;
-			const newPersonObject = {
-				...person,
-				number: newNumber,
-			};
-
+		const newPerson = { name: `${newName}`, number: `${newNumber}` };
+		if (persons.find((p) => p.name === newName)) {
+			const id = persons.find((p) => p.name === newName).id;
 			if (
 				window.confirm(
-					`${newName} is already added to phonebook, replace old number with the new one?`,
+					`${newName} is already in phonebook, want to replace the old number with a new one?`,
 				)
 			) {
 				personService
-					.update(id, newPersonObject)
+					.update(id, newPerson)
 					.then((response) => {
-						setPersons(
-							persons.map((person) =>
-								person.name === newPersonObject.name ? response.data : person,
-							),
-						);
-						setNotification(`Successfully added new number for ${newName}.`);
+						setSuccessMessage(`Successfully added new number for ${newName}`);
 						setTimeout(() => {
-							setNotification(null);
+							setSuccessMessage("");
 						}, 5000);
 					})
 					.catch((error) => {
-						setNotification(
-							`Information for ${newName} has already been removed from the server.`,
-						);
+						setErrorMessage(`${newName} was already removed from the server`);
 						setTimeout(() => {
-							setNotification(null);
+							setErrorMessage("");
 						}, 5000);
-						setPersons(
-							persons.filter((person) => person.name !== newPersonObject.name),
-						);
 					});
+
+				personService.getAll().then((persons) => {
+					setPersons(persons);
+				});
 			}
 		} else {
-			const personObject = {
-				name: newName,
-				number: newNumber,
-			};
-
-			personService.create(personObject).then((response) => {
-				setPersons(persons.concat(response.data));
-				setNewName("");
-				setNewNumber("");
+			setPersons(persons.concat(newPerson));
+			personService.create(newPerson).then((response) => {
+				setSuccessMessage(`Successfully added ${newName}`);
+				setTimeout(() => {
+					setSuccessMessage("");
+				}, 5000);
 			});
-			setNotification(`Successfully added ${newName}`);
-			setTimeout(() => {
-				setNotification(null);
-			}, 5000);
 		}
-	};
+
+		setNewName("");
+		setNewNumber("");
+	}
+
+	const personsToShow =
+		searchInput !== ""
+			? persons.filter((p) =>
+					p.name.toLowerCase().startsWith(searchInput.toLowerCase()),
+				)
+			: persons;
 
 	const deletePerson = (id) => {
 		personService.remove(id).then(() => {
@@ -146,42 +156,38 @@ const App = () => {
 		});
 	};
 
-	const handleNameInputChange = (event) => {
+	const handleNameChange = (event) => {
 		setNewName(event.target.value);
 	};
 
-	const handleNumberInputChange = (event) => {
+	const handleNumberChange = (event) => {
 		setNewNumber(event.target.value);
 	};
-
-	const handlePersonFilter = (event) => {
-		setPersonFilter(event.target.value.toLowerCase().trim());
+	const handleSearchChange = (event) => {
+		setSearchInput(event.target.value);
 	};
-
-	const personsToShow = persons.filter(
-		(person) =>
-			person.name.toLowerCase().trim().startsWith(personFilter) === true,
-	);
 
 	return (
 		<div>
 			<h2>Phonebook</h2>
-			<Notification message={notification} />
-			<Filter value={personFilter} onChange={handlePersonFilter} />
-			<h3>Add a new</h3>
+			<Notification message={errorMessage} />
+			<SuccessNotification message={successMessage} />
+			<Filter
+				searchInput={searchInput}
+				handleSearchChange={handleSearchChange}
+			/>
+
+			<h2>add a new person</h2>
 			<PersonForm
-				onSubmit={addPerson}
-				name={newName}
-				number={newNumber}
-				handleNumberInputChange={handleNumberInputChange}
-				handleNameInputChange={handleNameInputChange}
+				newName={newName}
+				newNumber={newNumber}
+				handleNameChange={handleNameChange}
+				handleNumberChange={handleNumberChange}
+				addPerson={addPerson}
 			/>
-			<h3>Numbers</h3>
-			<Persons
-				personsToShow={personsToShow}
-				persons={persons}
-				deletePerson={deletePerson}
-			/>
+
+			<h2>Numbers</h2>
+			<Persons personsToShow={personsToShow} deletePerson={deletePerson} />
 		</div>
 	);
 };

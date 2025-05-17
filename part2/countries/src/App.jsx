@@ -1,35 +1,43 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+import { useState, useEffect } from "react";
+import "./index.css";
+import countryService from "./services/countries";
+import CountriesList from "./components/CountriesList";
+import Filter from "./components/FIlter";
 
-function App() {
-  const [count, setCount] = useState(0)
+const App = () => {
+	const [searchInput, setSearchInput] = useState("");
+	const [countries, setCountries] = useState([]);
 
-  return (
-    <>
-      <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.jsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
-  )
-}
+	useEffect(() => {
+		countryService.getAll().then((countries) => {
+			setCountries(countries);
+		});
+	}, []);
 
-export default App
+	const handleSearchChange = (event) => {
+		console.log(event.target.value);
+		setSearchInput(event.target.value);
+	};
+
+	const filteredCountries =
+		searchInput !== ""
+			? countries.filter((c) =>
+					c.name.common.toLowerCase().includes(searchInput.toLowerCase()),
+				)
+			: countries;
+
+	return (
+		<>
+			<Filter
+				handleSearchChange={handleSearchChange}
+				searchInput={searchInput}
+			/>
+			<CountriesList
+				searchInput={searchInput}
+				filteredCountries={filteredCountries}
+			/>
+		</>
+	);
+};
+
+export default App;
