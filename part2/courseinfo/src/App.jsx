@@ -1,5 +1,4 @@
 import Course from "./Course";
-
 const App = () => {
 	const courses = [
 		{
@@ -45,13 +44,7 @@ const App = () => {
 			],
 		},
 	];
-	return (
-		<>
-			{courses.map((course) => (
-				<Course key={course.id} course={course} />
-			))}
-		</>
-	);
+	return courses.map((course) => <Course key={course.id} course={course} />);
 };
 
 export default App;
