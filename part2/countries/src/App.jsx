@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import "./index.css";
 import countryService from "./services/countries";
 import CountriesList from "./components/CountriesList";
-import Filter from "./components/FIlter";
+import Filter from "./components/Filter";
 
 const App = () => {
 	const [searchInput, setSearchInput] = useState("");
